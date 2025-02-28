@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot Sofie</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #ffffff;
+            margin: 0;
+            padding: 0;
+        }
+        img {
+            width: 250px;
+            height: auto;
+            margin-top: 20px;
+        }
+        #chatbot {
+            display: none;
+            width: 300px;
+            height: 400px;
+            background-color: #ffffff;
+            border: 2px solid #ff66b2;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            position: relative;
+            margin: 0 auto;
+        }
+        #chatbot-header {
+            background-color: #ff66b2;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        #chatbox {
+            width: 100%;
+            height: 200px;
+            border: 1px solid #ff66b2;
+            border-radius: 5px;
+            margin-top: 10px;
+            padding: 10px;
+            overflow-y: auto;
+            font-size: 14px;
+            background-color: #ffe6f2;
+            box-sizing: border-box;
+        }
+        #user-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ff66b2;
+            border-radius: 5px;
+            margin-top: 10px;
+            font-size: 14px;
+            background-color: #fff;
+            box-sizing: border-box;
+        }
+        #send-btn {
+            background-color: #ff66b2;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        #send-btn:hover {
+            background-color: #ff3385;
+        }
+        .user-message {
+            text-align: right;
+            background-color: #ffccff;
+            padding: 5px;
+            border-radius: 5px;
+            margin-top: 5px;
+        }
+        .marie-message {
+            text-align: left;
+            background-color: #ffe6f2;
+            padding: 5px;
+            border-radius: 5px;
+            margin-top: 5px;
+            width: calc(100% - 22px);
+            box-sizing: border-box;
+            font-size: 16px;
+            font-weight: normal;
+        }
+        .marie-message span {
+            font-weight: bold;
+        }
+        #response-buttons {
+            margin-top: 10px;
+        }
+        .response-btn {
+            background-color: #ff66b2;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .response-btn:hover {
+            background-color: #ff3385;
+        }
+    </style>
+</head>
+<body>
+    <img src="marie.png" alt="Sofie Marie the cat" />
+    <div id="chatbot">
+        <div id="chatbot-header">Chatbot Sofie Marie</div>
+        <div id="chatbox"></div>
+        <div id="response-buttons">
+            <button class="response-btn" id="question1-btn" style="display: none;" onclick="giveAnswer(1)">La ce masă stai?</button>
+            <button class="response-btn" id="question2-btn" style="display: none;" onclick="giveAnswer(2)">În ce cameră ești cazat?</button>
+        </div>
+    </div>
+
+    <script>
+        // Lista de invitați (numele, camera, masa)
+        const listaInvitati = [
+            { nume: "Irina Lita", camera: "Camera 3", masa: "Masa 2" },
+            { nume: "Gabriel Lita", camera: "Camera 3", masa: "Masa 2" },
+            { nume: "Marius Costache", camera: "Nu vei fi cazat aici", masa: "Masa 2" },
+            { nume: "Lavinia Puiu", camera: "Nu vei fi cazat aici", masa: "Masa 2" },
+            { nume: "Adriana Cococi", camera: "Camera 22", masa: "Masa 2" },
+            { nume: "Alexandru Tache", camera: "Camera 22", masa: "Masa 2" },
+            { nume: "Antonio Cococi", camera: "Camera 21", masa: "Masa 2" },
+            { nume: "Bogdan Stoica", camera: "Camera 6", masa: "Masa 2" },
+            { nume: "Silviu Soare", camera: "Nu vei fi cazat aici", masa: "Masa 2" },
+            { nume: "Corina Costache", camera: "Nu vei fi cazat aici", masa: "Masa 1" },
+            { nume: "Antonio Costache", camera: "Nu vei fi cazat aici", masa: "Masa 1" },
+            { nume: "Razvan Solzaru", camera: "Nu vei fi cazat aici", masa: "Masa 1" },
+            { nume: "Ioana Solzaru", camera: "Nu vei fi cazat aici", masa: "Masa 1" },
+            { nume: "Bogdan Pirvu", camera: "Nu vei fi cazat aici", masa: "Masa 1" },
+            { nume: "Larisa Pirvu", camera: "Nu vei fi cazat aici", masa: "Masa 1" },
+            { nume: "Razvan Manole", camera: "Nu vei fi cazat aici", masa: "Masa 1" },
+            { nume: "Alexandra Tudose", camera: "Nu vei fi cazat aici", masa: "Masa 1" },
+            { nume: "Magda Cococi", camera: "Camera 21", masa: "Masa 3" },
+            { nume: "Corina Soare", camera: "Nu vei fi cazat aici", masa: "Masa 3" },
+            { nume: "Cristi Soare", camera: "Nu vei fi cazat aici", masa: "Masa 3" },
+            { nume: "Valentina Lita", camera: "Nu vei fi cazat aici", masa: "Masa 3" },
+            { nume: "Nicolae Lita", camera: "Nu vei fi cazat aici", masa: "Masa 3" },
+            { nume: "Romeo Tudoran", camera: "Camera 2", masa: "Masa 3" },
+            { nume: "Mirabela Tudoran", camera: "Camera 2", masa: "Masa 3" },
+            { nume: "Catalin Tudoran", camera: "Camera 4", masa: "Masa 3" },
+            { nume: "Carmen Tudoran", camera: "Camera 4", masa: "Masa 3" },
+            { nume: "Andreea Grigore", camera: "Camera 10", masa: "Masa 5" },
+            { nume: "Bogdan Grigore", camera: "Camera 10", masa: "Masa 5" },
+            { nume: "Roxana Carabulea", camera: "Nu vei fi cazat aici", masa: "Masa 5" },
+            { nume: "Marius Toroipan", camera: "Camera 1", masa: "Masa 5" },
+            { nume: "Nicoleta Toroipan", camera: "Camera 1", masa: "Masa 5" },
+            { nume: "Marius Constantin", camera: "Camera 5", masa: "Masa 5" },
+            { nume: "Claudia Constantin", camera: "Camera 5", masa: "Masa 5" },
+            { nume: "Ioan Tepelus", camera: "Camera 12", masa: "Masa 5" },
+            { nume: "Roxana Tepelus", camera: "Camera 12", masa: "Masa 5" },
+            { nume: "Cristian Calin", camera: "Camera 9", masa: "Masa 4" },
+            { nume: "Andra Calin", camera: "Camera 9", masa: "Masa 4" },
+            { nume: "Cosmin Sandu", camera: "Nu vei fi cazat aici", masa: "Masa 4" },
+            { nume: "Ionut Buzatu", camera: "Camera 8", masa: "Masa 4" },
+            { nume: "Elena Buzatu", camera: "Camera 8", masa: "Masa 4" },
+            { nume: "Ionut Badeanu", camera: "Camera 7", masa: "Masa 4" },
+            { nume: "Cosmin Badea", camera: "Nu vei fi cazat aici", masa: "Masa 4" },
+            { nume: "Larisa Badea", camera: "Nu vei fi cazat aici", masa: "Masa 4" }
+
+        ];
+
+        let userName = '';
+        let invitat = null;
+
+        window.onload = function() {
+            setTimeout(function() {
+                document.getElementById("chatbot").style.display = "block";
+
+                var chatbox = document.getElementById("chatbox");
+                var marieMessageDiv = document.createElement("div");
+                marieMessageDiv.classList.add("marie-message");
+                marieMessageDiv.innerHTML = '<span>Sofie Marie:</span> Bună! Eu sunt pisicuța Sofie Marie. Te aștept cu drag la botezul meu. Dacă îmi spui cum te numești (prenume nume) te pot ajuta cu informații legate de masa la care vei sta și de camera unde vei fi cazat.';
+                chatbox.appendChild(marieMessageDiv);
+
+                // Adaugă input pentru nume
+                var nameInput = document.createElement("input");
+                nameInput.setAttribute("id", "name-input");
+                nameInput.setAttribute("placeholder", "Cum te numești?");
+                nameInput.setAttribute("type", "text");
+                nameInput.style.marginTop = "10px";
+                chatbox.appendChild(nameInput);
+                nameInput.focus();
+
+                nameInput.addEventListener("keypress", function(event) {
+                    if (event.key === "Enter" && nameInput.value.trim() !== "") {
+                        userName = nameInput.value;
+                        var userMessageDiv = document.createElement("div");
+                        userMessageDiv.classList.add("user-message");
+                        userMessageDiv.textContent = "Tu: " + userName;
+                        chatbox.appendChild(userMessageDiv);
+
+                        // Căutăm utilizatorul în lista de invitați
+                        invitat = listaInvitati.find(inv => inv.nume.trim().toLowerCase() === userName.trim().toLowerCase());
+
+                        // Afișăm răspunsul pe baza rezultatului căutării
+                        var botMessageDiv = document.createElement("div");
+                        botMessageDiv.classList.add("marie-message");
+
+                        if (invitat) {
+                            botMessageDiv.innerHTML = `<span>Sofie Marie:</span> Încântată de cunoștință, ${userName}! Te pot ajuta cu răspunsurile la întrebările de mai jos. Te rog să selectezi întrebarea la care vrei să răspund.`;
+
+                            // Afișează butoanele pentru întrebări
+                            document.getElementById("question1-btn").style.display = "inline-block";
+                            document.getElementById("question2-btn").style.display = "inline-block";
+                        } else {
+                            botMessageDiv.innerHTML = `<span>Sofie Marie:</span> Îmi pare rău, dar numele introdus nu îmi este cunoscut. Mai încearcă!`;
+
+                            // Resetează inputul pentru un nou nume
+                            var newNameInput = document.createElement("input");
+                            newNameInput.setAttribute("id", "name-input");
+                            newNameInput.setAttribute("placeholder", "Cum te numești?");
+                            newNameInput.setAttribute("type", "text");
+                            chatbox.appendChild(newNameInput);
+                            newNameInput.focus();
+
+                            newNameInput.addEventListener("keypress", function(event) {
+                                if (event.key === "Enter" && newNameInput.value.trim() !== "") {
+                                    userName = newNameInput.value;
+                                    userMessageDiv.textContent = "Tu: " + userName;
+                                    chatbox.appendChild(userMessageDiv);
+
+                                    // Căutăm utilizatorul din nou în lista de invitați
+                                    invitat = listaInvitati.find(inv => inv.nume.trim().toLowerCase() === userName.trim().toLowerCase());
+
+                                    // Afișăm din nou rezultatul căutării
+                                    var botMessageDiv = document.createElement("div");
+                                    botMessageDiv.classList.add("marie-message");
+
+                                    if (invitat) {
+                                        botMessageDiv.innerHTML = `<span>Sofie Marie:</span> Încântată de cunoștință, ${userName}! Te pot ajuta cu răspunsurile la întrebările de mai jos. Te rog să selectezi întrebarea la care vrei să răspund.`;
+
+                                        // Afișează butoanele pentru întrebări
+                                        document.getElementById("question1-btn").style.display = "inline-block";
+                                        document.getElementById("question2-btn").style.display = "inline-block";
+                                    } else {
+                                        botMessageDiv.innerHTML = `<span>Sofie Marie:</span> Îmi pare rău, dar numele introdus nu îmi este cunoscut. Mai încearcă!`;
+                                    }
+                                    chatbox.appendChild(botMessageDiv);
+                                    chatbox.scrollTop = chatbox.scrollHeight;
+                                }
+                            });
+                        }
+
+                        chatbox.appendChild(botMessageDiv);
+                        chatbox.scrollTop = chatbox.scrollHeight;
+
+                        // Șterge input-ul de nume
+                        nameInput.style.display = "none";
+                    }
+                });
+            }, 1000);
+        };
+
+        // Funcție pentru a răspunde la întrebările selectate
+        function giveAnswer(questionNumber) {
+            var chatbox = document.getElementById("chatbox");
+
+            var answerDiv = document.createElement("div");
+            answerDiv.classList.add("marie-message");
+
+            if (invitat) {
+                if (questionNumber === 1) {
+                    answerDiv.innerHTML = `<span>Sofie Marie:</span> O să petreci la masa ${invitat.masa}!`;
+                } else if (questionNumber === 2) {
+                    answerDiv.innerHTML = `<span>Sofie Marie:</span> Ești cazat în camera ${invitat.camera}.`;
+                }
+            }
+
+            chatbox.appendChild(answerDiv);
+            chatbox.scrollTop = chatbox.scrollHeight;
+        }
+    </script>
+</body>
+</html>
